@@ -1,0 +1,40 @@
+/*
+	Creation date: 03/06/2020
+	last update: 05/06/2020
+	updater: Andrade, J. V.
+	REV: 0.001
+	Reviewer: J., Doe
+	Review Date: --/--/--
+
+	The REV number represents:
+		- 0.XXX: CSS version
+		- X.000: Iteration
+*/
+
+body{
+	position: fixed;
+	left: 0px;
+	top: 0px;
+
+	width: 100vw;
+	height: 100vh;
+
+	border: 0px;
+	margin: 0px;
+	padding: 0px;
+
+	background-color: #000000;
+}
+
+#project{
+	position: fixed;
+
+	margin: 0px;
+	padding: 0px;
+
+	border: 0.1vh;
+	border-color: #FFFFFF;
+	border-style: solid;
+
+	background-color: #202020;
+}
