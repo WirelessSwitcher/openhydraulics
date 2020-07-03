@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<!--
+	Creation date: 03/07/2020
+	last update: 03/07/2020
+	updater: Andrade, J. V.
+	REV: 0.001.001.001
+	Reviewer: J., Doe
+	Review Date: --/--/--
+
+	The REV number represents:
+		- 0.000.000.XXX: Script version
+		- 0.000.XXX.000: CSS version
+		- 0.XXX.000.000: HTML version
+		- X.000.000.000: Iteration
+-->
+<html lang="en-uk ">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="OpenHydraulics" content="Draw PNID with ease">
+		<meta name="keywords" content="PNID, hydraulics, OpenHydraulics, CAD">
+		<meta name="author" content="J. V., Andrade">
+		<meta name="viewport" contetn="width=device-width, initial-scale=1.0">
+		<style>
+			body{
+				position: fixed;
+				left: 0px;
+				top: 0px;
+
+				width: 100vw;
+				height: 100vh;
+
+				border: 0px;
+				margin: 0px;
+				padding: 0px;
+
+				font-family: Arial;
+
+				background-color: #000000;
+			}
+
+			#project{
+				position: fixed;
+
+				margin: 0px;
+				padding: 0px;
+
+				border: 0.1vh;
+				border-color: #FFFFFF;
+				border-style: solid;
+
+				background-color: #202020;
+			}
+
+			#showTagButton{
+				position: fixed;
+
+				margin: 0px;
+				padding: 0px;
+
+				border: 2px;
+				border-color: transparent;
+				border-style: solid;
+				border-radius: 5px;
+
+				font-size: 70%;
+
+				background:#202020;
+
+				cursor: pointer;
+			}
+
+			#showTag{
+				position: absolute;
+
+				width: 100%;
+
+				margin: 0px;
+				padding: 4px 0px 4px 0px;
+
+				text-align: center;
+				color: white;
+
+				background-color: transparent;
+
+				cursor: pointer;
+			}
+
+			#posX{
+				position: absolute;
+
+				left: 70vw;
+				top: 2vh;
+
+				margin: 0px;
+				padding: auto;
+
+				width: 7vh;
+				height: 3vh;
+
+				text-align: center;
+
+				background-color: white;
+			}
+
+			#posY{
+				position: absolute;
+
+				left: 80vw;
+				top: 2vh;
+
+				margin: 0px;
+				padding: auto;
+
+				width: 7vh;
+				height: 3vh;
+
+				text-align: center;
+
+				background-color: white;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="showTagButton" onmouseover="highlight(this)" onmouseout="unhighlight(this)" onclick="showTag()">
+			<div id="showTag">Show Tags</div>
+		</div>
+
+		<div id="posX">X</div>
+		<div id="posY">Y</div>
+		<canvas id="project">
+			You do not have a canvas enabled browser.
+		</canvas>
+		<script>
+			// *********** LAYOUT *********** //
+
+			// Data base
+			var componentArray = [];										// Erase the graphical component's position
+			var showTagStatus = 0;											// Erase tag
+			var valveNum = 0;
+			var hoverArray = ["out", 0, 0];									// Initialize hover array
+			var dataBase = [];												// Initialize data base
+
+			var ctx = project.getContext('2d');											
+			var debounceResize = debounce(drawLayout, 250);					// Fetch context for projects
+			var debounceMouseMove = debounce(detectMouseOver, 10);
+
+			window.addEventListener("resize", debounceResize);				// Resize project when window is resized
+			window.addEventListener("load", drawLayout);					// Call drawLayout when page is loaded
+			project.addEventListener("mousemove", debounceMouseMove);
+			project.addEventListener("mousedown", showComponent);
+
+			function drawLayout(){
+				clearData();
+				defineDimensions();
+				defineDrawingArea();
+				defineAlignment();
+				defineGrid();
+				drawProject();
+				drawShowTagButton();
+			}
+
+			function showComponent(){
+				console.log(dataBase.length);
+				for(var i; i < dataBase.lenth; i++){
+					let thisValve = new digitalValve(dataBase[i]);
+					console.log(thisValve.tag);
+				}
+			}
+
+			let outArray = ["out", 0, 0];
+			var mouseOverArray = [outArray, outArray];
+
+			function detectMouseOver(e){
+
+				var g = defineSubdivision()[0];
+				var G = defineSubdivision()[1];
+
+				let leftOffset = parseInt(project.style.left);
+				let topOffset = parseInt(project.style.top);
+
+				let projectWidth = parseInt(project.offsetWidth);
+				let projectHeight = parseInt(project.offsetHeight);
+
+				let mouseX = parseInt(e.clientX - leftOffset);
+				let mouseY = parseInt(e.clientY - topOffset);
+
+				posX.innerHTML = mouseX;
+				posY.innerHTML = mouseY;
+
+				hoverArray = outArray;
+
+				for(var i = 0; i < componentArray.length; i++){
+
+					let currentComponent = componentArray[i];
+					let currentX = currentComponent[1] * g;
+					let currentY = currentComponent[2] * g;
+					let sideX = currentX + G;
+					let sideY = currentY + G;
+
+					if((currentX <= mouseX) && (mouseX <= sideX) && (currentY <= mouseY) && (mouseY <= sideY)){
+						hoverArray = currentComponent;
+					}
+				}
+
+				//console.log(hover);
+				mouseOverArray.push(hoverArray);
+				if(mouseOverArray.length > 2){
+					mouseOverArray.shift();
+				}
+
+				let mouseOver_Old = mouseOverArray[0];
+				let mouseOver_New = mouseOverArray[1];
+
+				if(mouseOver_Old != mouseOver_New){
+					//highLightElement(mouseOverArray[1]);
+					ctx.clearRect(0, 0, project.width, project.height);
+					drawLayout();
+				}
+			}
+
+			function clearData(){
+				// Clear cache:
+				componentArray = [];
+				dataBase = [];
+				valveNum = 0;
+			}
+
+			function defineDimensions(){
+
+				// Get current device properties
+				let windowWidth = window.innerWidth;
+				let windowHeight = window.innerHeight;
+
+				return[windowWidth, windowHeight];
+			}
+
+			function defineDrawingArea(){
+
+				// Get current device properties
+				let windowWidth = window.innerWidth;
+				let windowHeight = window.innerHeight;
+
+				// Calculate the exact dimensions for the project, so the grid fits in perfectly
+				let protoHeight = Math.floor((windowHeight * 0.9)/400) ;
+				let projectHeight = protoHeight*400;
+				let projectWidth = protoHeight*600;
+				
+				project.width = projectWidth;
+				project.height = projectHeight;
+
+				return [projectWidth, projectHeight];
+			}
+
+			function defineAlignment(){
+
+				let projectWidth = project.clientWidth;
+				let projectHeight = project.clientHeight;
+
+				// Get current device properties
+				let windowWidth = window.innerWidth;
+				let windowHeight = window.innerHeight;
+
+				// Align the project in the middle of the screen
+				let leftOffset = (windowWidth - projectWidth)/2 + "px";
+				let topOffset = (windowHeight - projectHeight)/2 + "px";
+
+				project.style.left = leftOffset;
+				project.style.top = topOffset;
+				
+				return[leftOffset, topOffset];
+			}
+
+			function defineGridscale(){
+				let gridScale = 10;
+				return gridScale;
+			}
+
+			function defineGrid() {
+				
+				let projectWidth = project.clientWidth;
+				let projectHeight = project.clientHeight;
+				let gridScale = defineGridscale();
+				let minSubdivision = defineSubdivision()[0];
+				let maxSubdivision  = defineSubdivision()[1];
+
+				// Inner grid
+				for(var x = 0; x <= projectWidth; x += minSubdivision) {
+					ctx.beginPath();
+					ctx.lineWidth = 1;
+					ctx.strokeStyle = "#000000";
+					ctx.moveTo(x, 0);
+					ctx.lineTo(x, projectHeight);
+					ctx.stroke();
+				}
+				for(var y = 0; y <= projectHeight; y += minSubdivision) {
+					ctx.beginPath();
+					ctx.lineWidth = 1;
+					ctx.strokeStyle = "#000000";
+					ctx.moveTo(0, y);
+					ctx.lineTo(projectWidth, y);
+					ctx.stroke();
+				}
+				
+				// Outter grid
+				for(var x = 0; x <= projectWidth; x += maxSubdivision) {
+					ctx.beginPath();
+					ctx.lineWidth = 1;
+					ctx.strokeStyle = "#808080";
+					ctx.moveTo(x, 0);
+					ctx.lineTo(x, projectHeight);
+					ctx.stroke();
+				}
+				for(var y = 0; y <= projectHeight; y += maxSubdivision) {
+					ctx.beginPath();
+					ctx.lineWidth = 1;
+					ctx.strokeStyle = "#808080";
+					ctx.moveTo(0, y);
+					ctx.lineTo(projectWidth, y);
+					ctx.stroke();
+				}
+
+				return[minSubdivision, maxSubdivision];
+			}
+
+			function defineSubdivision(){
+
+				projectWidth = project.width;
+
+				// Get grid scale
+				let gridScale = defineGridscale();
+
+				// Initialize grid variables
+				let minSubdivision = 0;
+				let maxSubdivision = 0;
+
+				// Calculate min and maxSubdivision
+				minSubdivision = Math.round(projectWidth/240);
+				maxSubdivision = minSubdivision*gridScale;
+
+				return [minSubdivision, maxSubdivision];
+			}
+
+			function drawShowTagButton(){
+
+				let projectWidth = project.clientWidth;
+				let projectHeight = project.clientHeight;
+
+				// Position in page
+				showTagButton.style.left = (projectWidth * 0.01) + "px";
+				showTagButton.style.top = (projectHeight * 0.01) + "px";
+
+				// Define size
+				showTagButton.style.width = (projectWidth * 0.10)  + "px";
+				showTagButton.style.height = (projectHeight * 0.05) + "px";
+
+				// Align text vertically
+				showTagButton.style.top = ((showTagButton.offsetHeight - showTag.offsetHeight)/2) + "px";
+			}
+
+			function highlight(element){
+				element.style.border = "2px solid #FFFFFF";
+			}
+
+			function unhighlight(element){
+				element.style.border = "2px solid #222";
+			}
+
+			function debounce(func, wait, immediate) {
+				var timeout;
+				return function() {
+					var context = this, args = arguments;
+					var later = function() {
+						timeout = null;
+						if (!immediate) func.apply(context, args);
+					};
+					var callNow = immediate && !timeout;
+					clearTimeout(timeout);
+					timeout = setTimeout(later, wait);
+					if (callNow) func.apply(context, args);
+				};
+			};
+
+			// ********* COMPONENTS ********* //
+
+			var tree = class{
+				constructor(
+					component
+				){
+					// Do something
+				}
+			}
+
+			var button = class{
+				constructor(
+					tag,
+					posX,
+					posY,
+					height,
+					length,
+					value,
+					status,
+					command
+				){
+					// Do something
+				}
+			}
+
+			var digitalValve = class{
+				constructor(
+					tag,
+					posX,
+					posY,
+					rotation,
+					status,
+					command
+				){
+					this.tag = tag;
+					this.posX = posX;
+					this.posY = posY;
+					this.rotation = rotation;
+					this.status = status;
+					this.command = command;
+
+					drawValve(this.tag, this.posX, this.posY, this.rotation, this.status);
+					addComponent2dataBase(this);
+					dataBase.push(this);
+				}
+			}
+
+			function addComponent2dataBase(component){
+
+				let currentComponent = [];
+				currentComponent.push(component.tag);
+				currentComponent.push(component.posX);
+				currentComponent.push(component.posY);
+				componentArray.push(currentComponent);											// Add valve to array
+
+				//let currentIcon = new screenIcon(component.tag, component.posX, component.posY, valveNum);
+				let thisComponent = componentArray[valveNum];									// Extract values and store in local variable
+
+				valveNum = valveNum + 1;
+			}
+
+			function drawValve(tag, xPos, yPos, angle, status){
+
+				let g = defineSubdivision()[0];											// Get project's smaller grid division
+				let G = defineSubdivision()[1];											// Get project's greater grid division
+
+				// Define dimensions
+				let l = 3 * g;															// Valve symbol base length
+				let L = G / 2;															// Valve bezel base legth
+
+				// Convert from general position to pixels
+				let x = xPos * g;
+				let y = yPos * g;
+
+				// Retrieve angular centre
+				let centreX = x + L;
+				let centreY = y + L;
+
+				// Status and command words
+				let inputStatus;
+				let outpuStatus;
+				let commandOpen;
+				let commandClose;
+
+				// Defines bezel colour
+				if(hoverArray[0] == tag){
+					bezelColour = "#FFFFFF";
+				}
+				else{
+					bezelColour = "#FFFF80";
+				}
+
+				// Calculates the hypothenusa from a triange in which the side is equivalent to the desired side width of the valve bezel
+				let H = Math.round(Math.sqrt(2) * L * 1000) / 1000;
+				let h = Math.round(Math.sqrt(2) * l * 1000) / 1000;
+
+				// Draw the outter bezel
+				for (var i = 0; i <= 4; i++){
+
+					let theta = i * 90 + 45;
+
+					// Transforms the angle from degrees to radians
+					let R = Math.round((angle + theta) * (Math.PI / 180) * 100) / 100;
+
+					let sinR = Math.round(Math.sin(R) * 1000) / 1000;
+					let cosR = Math.round(Math.cos(R) * 1000) / 1000;
+
+					let thetaX = (Math.round(x + (H * sinR)) * 1000) / 1000 + L;
+					let thetaY = (Math.round(y + (H * cosR)) * 1000) / 1000 + L;
+
+					if(i == 0){
+						ctx.beginPath();
+						ctx.moveTo(thetaX, thetaY);
+					}
+					else if (i == 4){
+						ctx.closePath();
+						ctx.strokeStyle = bezelColour;
+						ctx.stroke();
+					}
+					else {
+						ctx.lineTo(thetaX, thetaY);
+					}
+				}
+
+				// Draw valve
+				for (var i = 0; i <= 6; i++){
+					
+					let alpha = (i * 90) + 135;
+
+					// Transforms the angle from degrees to radians
+					let r = Math.round((angle + alpha) * (Math.PI / 180) * 100) / 100;
+
+					let sinr = Math.round(Math.sin(r) * 1000) / 1000;
+					let cosr = Math.round(Math.cos(r) * 1000) / 1000;
+
+					let alphaX = (Math.round(centreX + (h * sinr)) * 1000) / 1000;
+					let alphaY = (Math.round(centreY + (h * cosr)) * 1000) / 1000;
+
+					if(i == 0){
+						// Begin input triangle
+						ctx.beginPath();
+						ctx.moveTo(centreX, centreY);
+					}
+					else if (i == 3){
+						// End input triangle
+						ctx.closePath();
+						ctx.strokeStyle = "#800000";
+						ctx.stroke();
+						ctx.fillStyle = "#800000";
+						ctx.fill();
+
+						// Begin output triangle
+						ctx.beginPath();
+						ctx.moveTo(centreX, centreY);
+						ctx.lineTo(alphaX,alphaY);
+					}
+					else if (i == 5){
+						// End output triangle
+						ctx.closePath();
+						ctx.strokeStyle = "#008000";
+						ctx.stroke();
+						ctx.fillStyle = "#008000";
+						ctx.fill();
+					}
+					else {
+						ctx.lineTo(alphaX, alphaY);
+					}
+				}
+
+				// Draw Tag
+				if(showTagStatus == 1){
+					let tagFont = (5*g) + "px Arial white";
+					let tagX = x + L;
+					let tagY = y + G + (5*g);
+					ctx.font = tagFont;
+					ctx.fillStyle = "#FFFFFF";
+					ctx.textAlign = "center";
+					ctx.fillText(tag, tagX, tagY)
+				}
+			}
+
+			function drawPipe(tree){
+
+				let projectWidth = project.clientWidth;
+				let gridScale = defineGridscale();
+
+				let g = defineSubdivision(projectWidth, gridScale)[0];
+				let G = defineSubdivision(projectWidth, gridScale)[1];
+
+				let centreX = [];
+				let centreY = [];
+				let angleR = [];
+
+				let startInputX = [];
+				let startInputY = [];
+				let endInputX = [];
+				let endInputY = [];
+
+				let startOutputX = [];
+				let startOutputY = [];
+				let endOutputX = [];
+				let endOutputY = [];
+
+				for(var i = 0; i < tree.length; i++){
+
+					// Gets the valve's coordinates and rotation angle
+					centreX.push((tree[i].posX * g) + G/2);
+					centreY.push((tree[i].posY * g) + G/2);
+					angleR.push(tree[i].rotation);
+
+					let l = Math.round(((4 * g) / Math.sqrt(2)) * 1000) / 1000;		// Calculates the valve's symbol rotation radius
+					let L = Math.round((G / Math.sqrt(2)) * 1000) / 1000;			// Calculates the valve's bezel rotation radius
+
+					let polarl = polarCoordinate(l, l, (angleR[i] + 90));
+					let polarL = polarCoordinate(L, L, (angleR[i] + 90));
+					
+					startInputX.push(centreX[i] - polarl[0]);
+					startInputY.push(centreY[i] - polarl[1]);
+					startOutputX.push(centreX[i] + polarl[0]);
+					startOutputY.push(centreY[i] + polarl[1]);
+
+					endInputX.push(centreX[i] - polarL[0]);
+					endInputY.push(centreY[i] - polarL[1]);
+					endOutputX.push(centreX[i] + polarL[0]);
+					endOutputY.push(centreY[i] + polarL[1]);
+
+					switch(i){
+						case 0:															// First valve doesn't need input pipe
+						drawOuputPipe();
+						break;
+
+						case (tree.length - 1):											// Last valve doesn't need output pipe
+						drawInputPipe();
+						checkRelativePosition();
+						break;
+
+						default:
+						drawInputPipe();
+						drawOuputPipe();
+						checkRelativePosition();
+					}
+				
+					function drawInputPipe(){
+						// Draw input pipe
+						ctx.beginPath();
+						ctx.moveTo(startInputX[i], startInputY[i]);
+						ctx.lineTo(endInputX[i], endInputY[i]);
+						ctx.strokeStyle = "#FF00FF";
+						ctx.stroke();
+					}
+
+					function drawOuputPipe(){
+						// Draw output pipe
+						ctx.beginPath();
+						ctx.moveTo(startOutputX[i], startOutputY[i]);
+						ctx.lineTo(endOutputX[i], endOutputY[i]);
+						ctx.strokeStyle = "#00FFFF";
+						ctx.stroke();
+					}
+
+					function checkRelativePosition(){
+						ctx.beginPath();
+						ctx.moveTo(endOutputX[i-1], endOutputY[i-1]);
+
+						ctx.lineTo(endInputX[i], endOutputY[i-1]);
+						ctx.lineTo(endInputX[i], endInputY[i]);
+
+						ctx.strokeStyle = "#0000FF";
+						ctx.stroke();
+					}
+				}
+			}
+
+			function polarCoordinate(X, Y, angle){
+				// Place here the recurrent code to convert the cartesian coordinates to angular coordinates
+				let rho = angle * (Math.PI / 180);									// Converts angle to radians
+				let sinR = Math.sin(rho);											// Get's the sin from the valve's current  angle
+				let cosR = Math.cos(rho);											// Get's the cos from the valve's current  angle
+				let rhoX = Math.round((X * sinR) * 1000) / 1000;					// Converts to polar X
+				let rhoY = Math.round((Y * cosR) * 1000) / 1000;					// Converts to polar Y
+
+				//console.log("rhoX is: " + rhoX + " and rhoY is: " + rhoY);
+				return [rhoX, rhoY];
+			}
+
+			function nodeConnection(){
+				// This node is used to make corners where the algorithm can't position directly
+				// This also should function to connect different valve trees when needed
+			}
+
+			function showTag(){
+				if(showTagStatus == 0){
+					showTagStatus = 1;
+					showTagButton.style.background = "linear-gradient(to left, #743ad5, #d53a9d)";
+				}
+				else{
+					showTagStatus = 0;
+					showTagButton.style.background = "#202020";
+				}
+				console.log("showTagStatus now is: " + showTagStatus);
+
+				drawLayout();
+
+				return showTagStatus;
+			}
+
+			// *********** PROJECT ********** //
+			function drawProject(){
+			var valve1 = new digitalValve("Valve1", 10, 10, 0);
+			var valve2 = new digitalValve("Valve2", 40, 30, 270);
+
+			var valve3 = new digitalValve("Valve3", 60, 20, 0);
+			var valve4 = new digitalValve("Valve4", 100, 50, 0);
+
+			var valve5 = new digitalValve("Dingetje", 80, 90, 270);
+
+			//console.log(valve1.present()[0] + ", " + valve1.present()[1]);
+
+			var tree1 = [valve1, valve2, valve3, valve4];
+			var tree2 = [valve3, valve5];
+
+			drawPipe(tree1);
+			drawPipe(tree2);
+		}
+
+		</script>
+	<body>
+</html>
