@@ -1,10 +1,10 @@
  /*
-	Creation date: 03 / 06 / 2020
-	last update: 02 / 07 / 2020
+	Creation date: 03/06/2020
+	last update: 02/07/2020
 	updater: Andrade, J. V.
 	REV: 0.001
 	Reviewer: J., Doe
-	Review Date: -- / -- / --
+	Review Date: --/--/----
 
 	The REV number represents:
 		- 0.XXX: JS version
