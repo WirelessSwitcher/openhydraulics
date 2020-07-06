@@ -11,7 +11,7 @@
 		- X.000: Iteration
 */
 
-
+// Global variables
 // Data base
 var componentArray = [];													// Erase the graphical component's position
 var showTagStatus = 0;														// Erase tag
@@ -19,15 +19,19 @@ var valveNum = 0;
 var hoverArray = ["out", 0, 0];												// Initialize hover array
 var dataBase = [];															// Initialize data base
 
-var ctx = project.getContext('2d');											
-var debounceResize = debounce(drawLayout, 250);							// Fetch context for projects
-var debounceMouseMove = debounce(detectMouseOver, 10);
+var ctx = project.getContext('2d');											// Initialize project canvas
+var outArray = ["out", 0, 0];												// Empty icon model
+var mouseOverArray = [outArray, outArray];									// Initialize mouseOverArray with empty icons
+
+var debounceResize = debounce(drawLayout, 250);								// Fetch context for projects
+var debounceMouseMove = debounce(detectMouseOver, 10);						// Debounce mouse movement
 
 window.addEventListener("resize", debounceResize);							// Resize project when window is resized
 window.addEventListener("load", drawLayout);								// This event calls the drawLayout function when the page is loaded
 project.addEventListener("mousemove", debounceMouseMove);
 project.addEventListener("mousedown", showComponent);
 
+// Main fucntion 
 function drawLayout(){
 	clearData();
 	defineDimensions();
@@ -38,6 +42,8 @@ function drawLayout(){
 	drawShowTagButton();
 }
 
+// Specific functions
+
 function showComponent(){
 	console.log(dataBase.length);
 	for(var i; i < dataBase.lenth; i++){
@@ -45,9 +51,6 @@ function showComponent(){
 		console.log(thisValve.tag);
 	}
 }
-
-let outArray = ["out", 0, 0];
-var mouseOverArray = [outArray, outArray];
 
 function detectMouseOver(e){
 
@@ -110,7 +113,7 @@ function defineDimensions(){
 	let windowWidth = window.innerWidth;
 	let windowHeight = window.innerHeight;
 
-	return[windowWidth, windowHeight];
+	console.log(windowWidth, windowHeight);
 }
 
 function defineDrawingArea(){
@@ -127,7 +130,7 @@ function defineDrawingArea(){
 	project.width = projectWidth;
 	project.height = projectHeight;
 
-	return [projectWidth, projectHeight];
+	console.log(projectWidth, projectHeight);
 }
 
 function defineAlignment(){
