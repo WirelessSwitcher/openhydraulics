@@ -1,0 +1,12 @@
+{
+	"name": "administrator",
+	"password": "Baggerautomaat1!",
+	"isLogged": false,
+	"myArray": [0, 1, 2]
+}
+{
+	"name": "operator",
+	"password": null,
+	"isLogged": true,
+	"myArray": [0, 1, 2]
+}
