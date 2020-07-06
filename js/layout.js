@@ -1,6 +1,6 @@
 /*
 	Creation date: 03/06/2020
-	last update: 02/07/2020
+	last update: 06/07/2020
 	updater: Andrade, J. V.
 	REV: 0.001
 	Reviewer: J., Doe
@@ -11,7 +11,11 @@
 		- X.000: Iteration
 */
 
+// THIS IS A MODIFIED VERSION OF MY CODE
+
+
 // Global variables
+
 // Data base
 var componentArray = [];													// Erase the graphical component's position
 var showTagStatus = 0;														// Erase tag
@@ -19,10 +23,12 @@ var valveNum = 0;
 var hoverArray = ["out", 0, 0];												// Initialize hover array
 var dataBase = [];															// Initialize data base
 
+// Special objects
 var ctx = project.getContext('2d');											// Initialize project canvas
 var outArray = ["out", 0, 0];												// Empty icon model
 var mouseOverArray = [outArray, outArray];									// Initialize mouseOverArray with empty icons
 
+// Interactions
 var debounceResize = debounce(drawLayout, 250);								// Fetch context for projects
 var debounceMouseMove = debounce(detectMouseOver, 10);						// Debounce mouse movement
 
@@ -31,7 +37,7 @@ window.addEventListener("load", drawLayout);								// This event calls the draw
 project.addEventListener("mousemove", debounceMouseMove);
 project.addEventListener("mousedown", showComponent);
 
-// Main fucntion 
+// Main fucntion
 function drawLayout(){
 	clearData();
 	defineDimensions();
