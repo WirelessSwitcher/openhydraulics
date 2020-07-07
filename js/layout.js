@@ -1,6 +1,6 @@
 /*
 	Creation date: 03/06/2020
-	last update: 06/07/2020
+	last update: 07/07/2020
 	updater: Andrade, J. V.
 	REV: 0.001
 	Reviewer: J., Doe
@@ -124,7 +124,6 @@ function defineDrawingArea(){
 
 	//protoWidth = maxWidth;
 	//protoHeight = (maxWidth * 2) / 3;
-
 
 	if(maxHeight > maxWidth){
 
