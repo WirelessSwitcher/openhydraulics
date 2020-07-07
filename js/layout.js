@@ -11,9 +11,6 @@
 		- X.000: Iteration
 */
 
-// THIS IS A MODIFIED VERSION OF MY CODE
-
-
 // Global variables
 
 // Data base
@@ -33,6 +30,7 @@ var debounceResize = debounce(drawLayout, 250);								// Fetch context for proj
 var debounceMouseMove = debounce(detectMouseOver, 10);						// Debounce mouse movement
 
 window.addEventListener("resize", debounceResize);							// Resize project when window is resized
+//window.addEventListener("resize", drawLayout);							// Resize project when window is resized
 window.addEventListener("load", drawLayout);								// This event calls the drawLayout function when the page is loaded
 project.addEventListener("mousemove", debounceMouseMove);
 project.addEventListener("mousedown", showComponent);
@@ -40,7 +38,6 @@ project.addEventListener("mousedown", showComponent);
 // Main fucntion
 function drawLayout(){
 	clearData();
-	defineDimensions();
 	defineDrawingArea();
 	defineAlignment();
 	defineGrid();
@@ -113,30 +110,50 @@ function clearData(){
 	valveNum = 0;
 }
 
-function defineDimensions(){
-
-	// Get current device properties
-	let windowWidth = window.innerWidth;
-	let windowHeight = window.innerHeight;
-
-	console.log(windowWidth, windowHeight);
-}
-
 function defineDrawingArea(){
 
 	// Get current device properties
 	let windowWidth = window.innerWidth;
 	let windowHeight = window.innerHeight;
 
-	// Calculate the exact dimensions for the project, so the grid fits in perfectly
-	let protoHeight = Math.floor((windowHeight * 0.9)/400) ;
-	let projectHeight = protoHeight*400;
-	let projectWidth = protoHeight*600;
-	
-	project.width = projectWidth;
-	project.height = projectHeight;
+	let maxWidth = windowWidth * 0.8;
+	let maxHeight = windowHeight * 0.8;
 
-	console.log(projectWidth, projectHeight);
+	let protoWidth;
+	let protoHeight;
+
+	//protoWidth = maxWidth;
+	//protoHeight = (maxWidth * 2) / 3;
+
+
+	if(maxHeight > maxWidth){
+
+		//alert("Portrait mode");
+
+		protoWidth = maxWidth;
+		protoHeight = (maxWidth * 2) / 3;
+
+		//if(protoHeight > maxHeight){
+		//	alert("protoHeight > maxHeight");
+		//}
+	}
+	else{
+
+		//alert("Landscape mode");
+
+		protoWidth = (maxHeight * 3) / 2;
+		protoHeight = maxHeight;
+
+		if(protoWidth > maxWidth){
+			protoWidth = maxWidth;
+			protoHeight = (maxWidth * 2) / 3;
+		}
+	}
+
+
+	project.width = protoWidth;
+	project.height = protoHeight;
+
 }
 
 function defineAlignment(){
@@ -155,7 +172,7 @@ function defineAlignment(){
 	project.style.left = leftOffset;
 	project.style.top = topOffset;
 	
-	return[leftOffset, topOffset];
+	//return[leftOffset, topOffset];
 }
 
 function defineGridscale(){
