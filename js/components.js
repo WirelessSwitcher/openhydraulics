@@ -11,71 +11,80 @@
 		- X.000: Iteration
 */
 
-var tree = class{
-	constructor(
-		component
-	){
-		// Do something
-	}
-}
-
-var button = class{
-	constructor(
-		tag,
-		posX,
-		posY,
-		height,
-		length,
-		value,
-		status,
-		command
-	){
-		// Do something
-	}
-}
-
 var digitalValve = class{
 	constructor(
-		tag,
+		tag,																			// This is a unique name of the valve
 		posX,
 		posY,
 		rotation,
+		action,
 		status,
-		command
+		command,
+		description
 	){
 		this.tag = tag;
 		this.posX = posX;
 		this.posY = posY;
 		this.rotation = rotation;
+		this.action = action;
 		this.status = status;
 		this.command = command;
+		this.description = description;
 
 		drawValve(this.tag, this.posX, this.posY, this.rotation, this.status);
 		addComponent2dataBase(this);
 		dataBase.push(this);
+
+		//console.log(clickedArray);
+
+		/*
+			if(this.tag == clickedArray[0]){
+				var valveContext = new contextMenu(
+					this.tag,
+					this.posX,
+					this.posY,
+					this.description,
+					this.status,
+					"open",
+					"close",
+					"stop",
+					"diagnostics"
+				);
+			}
+		*/
 	}
 }
 
-/*var screenIcon = class{
+var contextMenu = class{
 	constructor(
 		tag,
 		posX,
 		posY,
-		length,
-		height,
-		idNumber
+		description,
+		status,
+		command,
+		button0,
+		button1,
+		button2,
+		button3,
+		button4,
+		button5,
 	){
 		this.tag = tag;
 		this.posX = posX;
 		this.posY = posY;
-		this.length = length;
-		this.height = height;
-		this.endX = posX + length;
-		this.endY = posY + height;
-		this.idNumber = idNumber;
+		this.description = description;
+		this.status = status;
+		this.command = command;
+		this.button0 = button0;
+		this.button1 = button1;
+		this.button2 = button2;
+		this.button3 = button3;
+		this.button4 = button4;
+		this.button5 = button5;
+		drawContextMenu(clickedElement);
 	}
-}*/
-
+}
 
 function addComponent2dataBase(component){
 
@@ -89,6 +98,26 @@ function addComponent2dataBase(component){
 	let thisComponent = componentArray[valveNum];									// Extract values and store in local variable
 
 	valveNum = valveNum + 1;
+}
+
+function drawContextMenu(clickedElement){
+	console.log("context menu called");
+
+	let contextMenuTop = (0.9 * project.offsetHeight);
+	let contextMenuLeft = 0;
+
+	console.log(contextMenuLeft + "\n" + contextMenuTop);
+
+	let contextMenuHeight = 0.1 * project.offsetHeight;
+	let contextMenuWidth = project.offsetWidth;
+
+	ctx.beginPath();
+	ctx.rect(contextMenuLeft, contextMenuTop, contextMenuWidth, contextMenuHeight);
+	ctx.strokeStyle = "pink";
+	ctx.stroke();
+	ctx.fillStyle = "pink";
+	ctx.fill();
+
 }
 
 function drawValve(tag, xPos, yPos, angle, status){
