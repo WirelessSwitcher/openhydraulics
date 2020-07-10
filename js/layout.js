@@ -1,6 +1,6 @@
 /*
 	Creation date: 03/06/2020
-	last update: 07/07/2020
+	last update: 10/07/2020
 	updater: Andrade, J. V.
 	REV: 0.001
 	Reviewer: J., Doe
@@ -19,6 +19,7 @@ var showTagStatus = 0;														// Erase tag
 var valveNum = 0;
 var hoverArray = ["out", 0, 0];												// Initialize hover array
 var dataBase = [];															// Initialize data base
+var clickedArray = [];
 
 // Special objects
 var ctx = project.getContext('2d');											// Initialize project canvas
@@ -32,8 +33,9 @@ var debounceMouseMove = debounce(detectMouseOver, 10);						// Debounce mouse mo
 window.addEventListener("resize", debounceResize);							// Resize project when window is resized
 //window.addEventListener("resize", drawLayout);							// Resize project when window is resized
 window.addEventListener("load", drawLayout);								// This event calls the drawLayout function when the page is loaded
+project.addEventListener('contextmenu', event => event.preventDefault());
 project.addEventListener("mousemove", debounceMouseMove);
-project.addEventListener("mousedown", showComponent);
+project.addEventListener("mousedown", mouseClickDetection);
 
 // Main fucntion
 function drawLayout(){
@@ -47,16 +49,64 @@ function drawLayout(){
 
 // Specific functions
 
-function showComponent(){
-	console.log(dataBase.length);
-	for(var i; i < dataBase.lenth; i++){
-		let thisValve = new digitalValve(dataBase[i]);
-		console.log(thisValve.tag);
+function mouseClickDetection(e){
+
+	let clickedElement = hoverArray[0];
+	clickedArray.push(clickedElement);
+	//console.log(clickedArray);
+	if(clickedArray.length > 2){
+		clickedArray.shift();
+	}
+	//defineAction(clickedElement);
+	let action;
+	
+	if(e.button == 0){
+		console.log("left click");
+		action = "toggle";
+	}
+	else if(e.button == 2){
+		console.log("right click");
+		action = "openPopUp";
+		drawContextMenu();
+	}
+	else{
+		console.log("Something else");
+	}
+
+	for(var i = 0; i < dataBase.length; i++){
+
+		let getter = dataBase[i];
+		let setter = getter;
+
+		if(clickedElement == getter.tag){
+			setter.action = action;
+			dataBase[i] = setter;
+			//console.log(dataBase[i].tag, dataBase[i].action);
+		}
 	}
 }
 
+/*
+function defineAction(clickedElement){
+
+	for(var i = 0; i < dataBase.length; i++){
+
+		let getter = dataBase[i];
+		let setter = getter;
+
+		if(clickedElement == getter.tag){
+			setter.action = 1;
+			dataBase[i] = setter;
+			console.log(dataBase[i].tag, dataBase[i].action);
+		}
+	}
+}
+*/
+
 function detectMouseOver(e){
 
+	// Get grid dimensions
+	var grid = defineSubdivision();
 	var g = defineSubdivision()[0];
 	var G = defineSubdivision()[1];
 
@@ -87,20 +137,24 @@ function detectMouseOver(e){
 		}
 	}
 
-	//console.log(hover);
 	mouseOverArray.push(hoverArray);
-	if(mouseOverArray.length > 2){
+	if(mouseOverArray.length >= 2){
 		mouseOverArray.shift();
 	}
 
 	let mouseOver_Old = mouseOverArray[0];
 	let mouseOver_New = mouseOverArray[1];
 
-	if(mouseOver_Old != mouseOver_New){
-		//highLightElement(mouseOverArray[1]);
+	if(mouseOver_Old[0] != mouseOver_New[0]){
+		//console.log("mouseOver_Old is: " + mouseOver_Old +"\nmouseOver_New is: " + mouseOver_New);
 		ctx.clearRect(0, 0, project.width, project.height);
 		drawLayout();
 	}
+	else{
+		//console.log("no change");
+	}
+
+	console.log(clickedArray);
 }
 
 function clearData(){
@@ -122,24 +176,11 @@ function defineDrawingArea(){
 	let protoWidth;
 	let protoHeight;
 
-	//protoWidth = maxWidth;
-	//protoHeight = (maxWidth * 2) / 3;
-
 	if(maxHeight > maxWidth){
-
-		//alert("Portrait mode");
-
 		protoWidth = maxWidth;
 		protoHeight = (maxWidth * 2) / 3;
-
-		//if(protoHeight > maxHeight){
-		//	alert("protoHeight > maxHeight");
-		//}
 	}
 	else{
-
-		//alert("Landscape mode");
-
 		protoWidth = (maxHeight * 3) / 2;
 		protoHeight = maxHeight;
 
@@ -148,11 +189,9 @@ function defineDrawingArea(){
 			protoHeight = (maxWidth * 2) / 3;
 		}
 	}
-
-
+	
 	project.width = protoWidth;
 	project.height = protoHeight;
-
 }
 
 function defineAlignment(){
@@ -170,8 +209,6 @@ function defineAlignment(){
 
 	project.style.left = leftOffset;
 	project.style.top = topOffset;
-	
-	//return[leftOffset, topOffset];
 }
 
 function defineGridscale(){
@@ -262,10 +299,12 @@ function drawShowTagButton(){
 }
 
 function highlight(element){
-	element.style.border = "2px solid #FFFFFF";
+
+	element.style.border = "2px solid #FFFFFF";	
 }
 
 function unhighlight(element){
+
 	element.style.border = "2px solid #222";
 }
 
@@ -283,3 +322,23 @@ function debounce(func, wait, immediate) {
 		if (callNow) func.apply(context, args);
 	};
 };
+
+/* DATA STORAGE AND LOGGING
+	var saveData = (function () {
+	    var a = document.createElement("a");
+	    document.body.appendChild(a);
+	    a.style = "display: none";
+	    return function (data, fileName) {
+	        var json = JSON.stringify(data),
+	            blob = new Blob([json], {type: "octet/stream"}),
+	            url = window.URL.createObjectURL(blob);
+	        a.href = url;
+	        a.download = fileName;
+	        a.click();
+	        window.URL.revokeObjectURL(url);
+	    };
+	}());
+	var data = { x: 42, s: "hello, world", d: new Date() },
+	fileName = "my-download.json";
+	saveData(data, fileName);
+*/
