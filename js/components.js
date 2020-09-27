@@ -1,9 +1,9 @@
  /*
 	Creation date: 03/06/2020
-	last update: 02/07/2020
+	last update: 18/08/2020
 	updater: Andrade, J. V.
 	REV: 0.001
-	Reviewer: J., Doe
+	Reviewer: Doe, J.
 	Review Date: --/--/----
 
 	The REV number represents:
@@ -14,11 +14,11 @@
 var digitalValve = class{
 	constructor(
 		tag,																			// This is a unique name of the valve
-		posX,
-		posY,
-		rotation,
-		action,
-		status,
+		posX,																			// X coordinate
+		posY,																			// Y coordinate
+		rotation,																		// Rotation angle in degrees
+		action,																			// Open / Close / PopUp Menu / Context Menu
+		status,																			// Opened / Closed / 
 		command,
 		description
 	){
@@ -31,35 +31,34 @@ var digitalValve = class{
 		this.command = command;
 		this.description = description;
 
-		drawValve(this.tag, this.posX, this.posY, this.rotation, this.status);
 		addComponent2dataBase(this);
 		dataBase.push(this);
 
-		//console.log(clickedArray);
+		//let actionTest = retrieveAction(this.tag);
+		//console.log(actionTest);
 
-		/*
-			if(this.tag == clickedArray[0]){
+		if(this.tag == clickedElement){													// detects if this is the clicked element
+	
+			drawValve(this.tag, this.posX, this.posY, this.rotation, this.status);
+	
+			// draws context menu
+			if(myAction == "openPopUp"){
 				var valveContext = new contextMenu(
-					this.tag,
-					this.posX,
-					this.posY,
-					this.description,
-					this.status,
-					"open",
-					"close",
-					"stop",
-					"diagnostics"
+					this.tag + "_contextMenu",
+					this.tag
 				);
 			}
-		*/
+		}
+		else {
+			drawValve(this.tag, this.posX, this.posY, this.rotation, this.status);
+		}
 	}
 }
 
 var contextMenu = class{
 	constructor(
 		tag,
-		posX,
-		posY,
+		title,
 		description,
 		status,
 		command,
@@ -71,8 +70,8 @@ var contextMenu = class{
 		button5,
 	){
 		this.tag = tag;
-		this.posX = posX;
-		this.posY = posY;
+		this.title = title;
+		//console.log(title);
 		this.description = description;
 		this.status = status;
 		this.command = command;
@@ -82,7 +81,158 @@ var contextMenu = class{
 		this.button3 = button3;
 		this.button4 = button4;
 		this.button5 = button5;
-		drawContextMenu(clickedElement);
+
+		let lineWidth = 4;
+
+		let contextMenuLeft = lineWidth/2;
+		let contextMenuTop = (0.9 * project.offsetHeight);
+
+		let contextMenuWidth = project.offsetWidth - contextMenuLeft - lineWidth;
+		let contextMenuHeight = (0.1 * project.offsetHeight) - lineWidth;
+
+		// Draw footer
+		ctx.save()
+		ctx.beginPath();
+		ctx.rect(contextMenuLeft, contextMenuTop, contextMenuWidth, contextMenuHeight);
+		ctx.lineWidth = lineWidth;
+		ctx.strokeStyle = "#FFFFFF";
+		ctx.stroke();
+		ctx.fillStyle = "#000000";
+		ctx.fill();
+		ctx.restore();
+
+		// Retrieves buttons dimensions
+		let percentage = 0.2 * contextMenuHeight;									// Used as button spacing and corner radius
+		let buttonArcRadius = percentage / 2;
+		let buttonWidth = (contextMenuWidth / 12) - (2 * percentage);
+		let buttonHeight = contextMenuHeight - (2 * percentage);
+
+		// Retrieves coordinates for drawing out the buttons
+		let p1X = percentage;
+		let p1Y = contextMenuTop + percentage;
+
+		var openButton = new button(
+			this.tag + "_Open",
+			"Open",
+			p1X,
+			p1Y,
+			buttonWidth,
+			buttonHeight,
+			buttonArcRadius,
+			this.status,
+			this.command
+		);
+
+		var closeButton = new button(
+			this.tag + "_Close",
+			"Close",
+			2 * p1X + buttonWidth,
+			p1Y,
+			buttonWidth,
+			buttonHeight,
+			buttonArcRadius,
+			this.status,
+			this.command
+		);this.posX = contextMenuLeft;
+		this.posY = contextMenuTop;
+
+		var stopButton = new button(
+			this.tag + "_Stop",
+			"Stop",
+			3 * p1X + 2 * buttonWidth,
+			p1Y,
+			buttonWidth,
+			buttonHeight,
+			buttonArcRadius,
+			this.status,
+			this.command
+		);
+
+		// Draw footer title
+		this.posX = contextMenuLeft;
+		this.posY = contextMenuTop;
+		
+		let tagFont = (0.3 * contextMenuHeight) + "px Arial";
+		let tagX = this.posX + (contextMenuWidth / 2);
+		let tagY = this.posY + (contextMenuHeight / 2) + (parseInt(tagFont) / 2);
+		ctx.font = tagFont;
+		ctx.fillStyle = "#00FF00";
+		ctx.textAlign = "center";
+		let tagWidth = ctx.measureText(tag).width;
+		ctx.fillText(this.title, tagX, tagY);
+
+		console.log(
+			tagFont + "\n"
+			+ contextMenuLeft /*posX*/ + "\n"
+			+ contextMenuTop /*posY*/ + "\n"
+			+ contextMenuWidth + "\n"
+			+ contextMenuHeight + "\n"
+			+ tagX + "\n"
+			+ tagY + "\n"
+			+ tagWidth
+		);
+	}
+}
+
+var button = class{
+	constructor(
+		tag,
+		text,
+		posX,
+		posY,
+		width,
+		height,
+		radius,
+		status,
+		command,
+		border,
+		background,
+	){
+		this.tag = tag;
+		this.text = text;
+		this.posX = posX;
+		this.posY = posY;
+		this.width = width;
+		this.height = height;
+		this.radius = radius;
+		this.status = status;
+		this.command = command;
+		this.border = border;
+		this.background = background;
+
+		addComponent2dataBase(this);
+
+		//let arcRadius = 0.05 * ((this.width + this.height) / 2);
+		let p1X = posX + this.radius;
+		let p1Y = posY + this.radius;
+		let p2X = posX + this.width - this.radius;
+		let p2Y = posY + this.height - this.radius;
+
+		// Draw button
+		ctx.save();																	// Save previous canvas configurations
+		ctx.beginPath();
+		ctx.arc(p1X, p1Y, this.radius, 1*Math.PI, 1.5*Math.PI);
+		ctx.arc(p2X, p1Y, this.radius, 1.5*Math.PI, 0*Math.PI);
+		ctx.arc(p2X, p2Y, this.radius, 0*Math.PI, 0.5*Math.PI);
+		ctx.arc(p1X, p2Y, this.radius, 0.5*Math.PI, 1*Math.PI);
+
+		ctx.closePath();
+		ctx.lineWidth = 4;
+		ctx.strokeStyle = "#808080"
+		ctx.stroke();
+		ctx.fillStyle = "#202020";
+		ctx.fill();
+		ctx.restore();
+
+		// Inner text
+		let tagFont = (0.3 * this.height) + "px Arial";
+		let tagX = posX + (this.width / 2);
+		let tagY = posY + (this.height / 2) + (parseInt(tagFont) / 2);
+		ctx.font = tagFont;
+		ctx.fillStyle = "#FFFFFF";
+		ctx.textAlign = "center";
+		let tagWidth = ctx.measureText(tag).width;
+		ctx.fillText(text, tagX, tagY);
 	}
 }
 
@@ -100,34 +250,14 @@ function addComponent2dataBase(component){
 	valveNum = valveNum + 1;
 }
 
-function drawContextMenu(clickedElement){
-	console.log("context menu called");
-
-	let contextMenuTop = (0.9 * project.offsetHeight);
-	let contextMenuLeft = 0;
-
-	console.log(contextMenuLeft + "\n" + contextMenuTop);
-
-	let contextMenuHeight = 0.1 * project.offsetHeight;
-	let contextMenuWidth = project.offsetWidth;
-
-	ctx.beginPath();
-	ctx.rect(contextMenuLeft, contextMenuTop, contextMenuWidth, contextMenuHeight);
-	ctx.strokeStyle = "pink";
-	ctx.stroke();
-	ctx.fillStyle = "pink";
-	ctx.fill();
-
-}
-
 function drawValve(tag, xPos, yPos, angle, status){
 
-	let g = defineSubdivision()[0];											// Get project's smaller grid division
-	let G = defineSubdivision()[1];											// Get project's greater grid division
+	let g = defineSubdivision()[0];													// Get project's smaller grid division
+	let G = defineSubdivision()[1];													// Get project's greater grid division
 
 	// Define dimensions
-	let l = 3 * g;															// Valve symbol base length
-	let L = G / 2;															// Valve bezel base legth
+	let l = 3 * g;																	// Valve symbol base length
+	let L = G / 2;																	// Valve bezel base legth
 
 	// Convert from general position to pixels
 	let x = xPos * g;
@@ -230,7 +360,7 @@ function drawValve(tag, xPos, yPos, angle, status){
 
 	// Draw Tag
 	if(showTagStatus == 1){
-		let tagFont = (5*g) + "px Arial white";
+		let tagFont = (5*g) + "px Arial";
 		let tagX = x + L;
 		let tagY = y + G + (5*g);
 		ctx.font = tagFont;
@@ -269,8 +399,8 @@ function drawPipe(tree){
 		centreY.push((tree[i].posY * g) + G/2);
 		angleR.push(tree[i].rotation);
 
-		let l = Math.round(((4 * g) / Math.sqrt(2)) * 1000) / 1000;		// Calculates the valve's symbol rotation radius
-		let L = Math.round((G / Math.sqrt(2)) * 1000) / 1000;			// Calculates the valve's bezel rotation radius
+		let l = Math.round(((4 * g) / Math.sqrt(2)) * 1000) / 1000;			// Calculates the valve's symbol rotation radius
+		let L = Math.round((G / Math.sqrt(2)) * 1000) / 1000;				// Calculates the valve's bezel rotation radius
 
 		let polarl = polarCoordinate(l, l, (angleR[i] + 90));
 		let polarL = polarCoordinate(L, L, (angleR[i] + 90));
@@ -345,13 +475,12 @@ function drawPipe(tree){
 
 function polarCoordinate(X, Y, angle){
 	// Place here the recurrent code to convert the cartesian coordinates to angular coordinates
-	let rho = angle * (Math.PI / 180);									// Converts angle to radians
-	let sinR = Math.sin(rho);											// Get's the sin from the valve's current  angle
-	let cosR = Math.cos(rho);											// Get's the cos from the valve's current  angle
-	let rhoX = Math.round((X * sinR) * 1000) / 1000;					// Converts to polar X
-	let rhoY = Math.round((Y * cosR) * 1000) / 1000;					// Converts to polar Y
+	let rho = angle * (Math.PI / 180);										// Converts angle to radians
+	let sinR = Math.sin(rho);												// Get's the sin from the valve's current  angle
+	let cosR = Math.cos(rho);												// Get's the cos from the valve's current  angle
+	let rhoX = Math.round((X * sinR) * 1000) / 1000;						// Converts to polar X
+	let rhoY = Math.round((Y * cosR) * 1000) / 1000;						// Converts to polar Y
 
-	//console.log("rhoX is: " + rhoX + " and rhoY is: " + rhoY);
 	return [rhoX, rhoY];
 }
 
@@ -369,10 +498,21 @@ function showTag(){
 		showTagStatus = 0;
 		showTagButton.style.background = "#202020";
 	}
-	console.log("showTagStatus now is: " + showTagStatus);
 
 	drawLayout();
 
 	return showTagStatus;
 }
-
+/*
+function retrieveAction(searchedValve){
+	let searchedValveIndex;
+	for(var i = 0; i < dataBase.length; i++){
+		if(dataBase[i].tag == searchedValve){
+			searchedValveIndex = i;
+		}
+	}
+	console.log(clickedElement);
+	console.log(searchedValveIndex);
+	return searchedValve;
+}
+*/
