@@ -1,18 +1,15 @@
 /*
 	Creation date: 03/06/2020
-	last update: 10/07/2020
+	last update: 18/08/2020
 	updater: Andrade, J. V.
 	REV: 0.001
-	Reviewer: J., Doe
+	Reviewer: Doe, J.
 	Review Date: --/--/--
 
 	The REV number represents:
 		- 0.XXX: JS version
 		- X.000: Iteration
 */
-
-/* this should be in a different*/
-
 
 function drawProject(){
 	var valve1 = new digitalValve("valve1", 10, 60, 90);
