@@ -1,0 +1,21 @@
+Disclaimer: The following documentation is written in coloquial language by a non-native english speaker.
+Let me know if there's anything wrong, be it grammar, spelling or plain non-sense.
+I am trying my best to keep it professional in a way my future self will still comprehend. :)
+
+
+1. Main Goals
+
+  OpenHydraulics aims to be a tool that summarizes and bridges the gap between system design, execution, operation and maintanence of complex industrial systems.
+
+1.1. Serve as a SCADA interface for IAS (Industrial Automationm Systems), displaying the critical pieces of equipment and instruments in an intuitive manner.
+1.2. Serve as an instruction set for control, abstracting the complex and/or proprietary programming languages aimed for process and machine automation.
+1.3. Monitor and store machine and process critical information for maintenance, ERP and CRM purposes.
+
+2. Desired features
+
+2.1. System and browser agnostic GUI
+2.2. Drag and drop system for drawing the hydraulics and synotic pages
+2.3. Flowchart programming/system design
+2.4. Adaptative and multi-input system (keyboard/mouse, touchscreen, VR/AR, etc)
+2.5. Connect to at least the main industrial protocols (Ethernet/IP, Profinet, Modbus, EtherCAT, CAN, OPC, etc.)
+2.6. Have a built-in and customizable tool to specify and dimension pieces of equipment (PLCs, relays, valves, etc.)
